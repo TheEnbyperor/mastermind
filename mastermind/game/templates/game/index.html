@@ -85,6 +85,31 @@
             if ($game_code.get(0).validity.valid) {
                 const game_code = $game_code.val();
                 if (game_code !== "") {
+                    $.get({
+                        url: '/game/' + game_code + '/',
+                        success: function (data) {
+                            if (data.status === "success") {
+                                $("#error-box").html("");
+                                status.game_code = data.game_id;
+                                status.start_time = new Date(data.start_time*1000);
+                            }
+                        },
+                        error: function (data) {
+                            if (typeof data.responseJSON !== "undefined") {
+                                if (data.responseJSON.error === "not-found") {
+                                    $("#error-box")
+                                        .html("<div class=\"alert alert-danger\" role=\"alert\">Game not found</div>")
+                                } else {
+                                    $("#error-box")
+                                        .html("<div class=\"alert alert-danger\" role=\"alert\">An unknown error occurred</div>")
+                                }
+                            } else {
+                                $("#error-box")
+                                    .html("<div class=\"alert alert-danger\" role=\"alert\">An unknown error occurred</div>")
+                            }
+                        },
+                        dataType: "json"
+                    });
                 } else {
                     $("#error-box").html("<div class=\"alert alert-danger\" role=\"alert\">Please input a game code</div>")
                 }
