@@ -70,12 +70,22 @@ def game_guess_view(request, id):
             resp.status_code = 404
             return resp
         game = game[0]
+        if not game.game_finished:
             row = GameRow(game=game, guess_colour_1=request.POST['pos1'], guess_colour_2=request.POST['pos2'],
                           guess_colour_3=request.POST['pos3'], guess_colour_4=request.POST['pos4'])
             row.save()
             out = {
                 "status": "success",
+                "correct": row.guess_correct,
+                "last": game.game_finished
             }
             return HttpResponse(json.dumps(out))
+        else:
+            out = {
+                "status": "error",
+                "error": "game-finished"
+            }
+            resp = HttpResponse(json.dumps(out))
+            resp.status_code = 410
     else:
         raise HttpResponseNotAllowed(permitted_methods=['POST'])

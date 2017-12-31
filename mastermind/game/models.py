@@ -30,6 +30,10 @@ class Game(models.Model):
     def guesses_left(self):
         return 10-len(GameRow.objects.filter(game=self))
 
+    @property
+    def game_finished(self):
+        return self.guesses_left == 0 or GameRow.objects.filter(game=self).order_by('time')[-1].guess_correct
+
     def __str__(self):
         return "{}: {}-{}-{}-{}".format(self.game_id, self.code_colour_1, self.code_colour_2,
                                         self.code_colour_3, self.code_colour_4)
