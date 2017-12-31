@@ -91,6 +91,9 @@
             </div>
         </div>
     </div>
+    <div class="mt-3" id="guesses">
+
+    </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"
         integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f"
@@ -105,6 +108,7 @@
     let status = {
         game_code: null,
         start_time: null,
+        timer: null,
     };
 
     function getCookie(name) {
@@ -123,6 +127,80 @@
         return cookieValue;
     }
     const csrftoken = getCookie('csrftoken');
+
+    const $guess_row = $(`<div class="row bg-secondary py-4 mb-3 rounded">
+            <div class="col-2">
+                <div class="row my-2">
+                    <div class="col-6 px-2">
+                        <div class="rounded-circle float-right resp-pin" style="width:20px;height:20px;"></div>
+                    </div>
+                    <div class="col-6 px-2">
+                        <div class="rounded-circle resp-pin" style="width:20px;height:20px;"></div>
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-6 px-2">
+                        <div class="rounded-circle float-right resp-pin" style="width:20px;height:20px;"></div>
+                    </div>
+                    <div class="col-6 px-2">
+                        <div class="rounded-circle resp-pin" style="width:20px;height:20px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="row my-2">
+                    <div class="col-3">
+                        <div class="rounded-circle guess-pin" style="margin:0 auto;width:50px;height:50px;"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="rounded-circle guess-pin" style="margin:0 auto;width:50px;height:50px;"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="rounded-circle guess-pin" style="margin:0 auto;width:50px;height:50px;"></div>
+                    </div>
+                    <div class="col-3">
+                        <div class="rounded-circle guess-pin" style="margin:0 auto;width:50px;height:50px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>`);
+    const $guesses = $("#guesses");
+    const colour_map = {
+        "R": "red",
+        "G": "green",
+        "Y": "yellow",
+        "BU": "blue",
+        "W": "white",
+        "BA": "black",
+    };
+
+    function getGuesses() {
+        $.get({
+            url: '/game/' + status.game_code + '/guesses/',
+            success: function (data) {
+                if (data.status === "success") {
+                    // console.log(data);
+                    $guesses.html("");
+                    for (let i=0;i<data.guesses.length;i++) {
+                        let $row = $guess_row.clone();
+                        for (let j = 0; j < 4; j++) {
+                            $($row.find(".guess-pin").get(j)).css("background-color", colour_map[data.guesses[i]["pos" + (j + 1)]]);
+                            if (data.guesses[i].num_black > 0) {
+                                data.guesses[i].num_black -= 1;
+                                $($row.find(".resp-pin").get(j)).css("background-color", "black");
+                            } else if (data.guesses[i].num_white > 0) {
+                                data.guesses[i].num_white -= 1;
+                                $($row.find(".resp-pin").get(j)).css("background-color", "white");
+                            }
+                        }
+                        $guesses.prepend($row);
+                    }
+                    $("#guesses-left").text(data["guesses-left"])
+                }
+            },
+            dataType: 'json'
+        })
+    }
 
     function sendGuess() {
         $.post({
@@ -168,6 +246,8 @@
                                 status.start_time = new Date(data.start_time*1000);
                                 $("#start-screen").hide();
                                 $("#guessing-screen").show();
+                                status.timer = setInterval(getGuesses, 1000);
+                                getGuesses();
                                 $("#guess-button").on("click", sendGuess);
                             } else {
                                 $("#error-box")

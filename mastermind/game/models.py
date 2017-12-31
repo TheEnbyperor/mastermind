@@ -26,6 +26,10 @@ class Game(models.Model):
     code_colour_3 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
     code_colour_4 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
 
+    @property
+    def guesses_left(self):
+        return 10-len(GameRow.objects.filter(game=self))
+
     def __str__(self):
         return "{}: {}-{}-{}-{}".format(self.game_id, self.code_colour_1, self.code_colour_2,
                                         self.code_colour_3, self.code_colour_4)
@@ -50,11 +54,17 @@ class GameRow(models.Model):
     @property
     def num_white_pegs(self):
         total = 0
+        used = []
         for i in range(1, 5):
-            for j in range(1, 5):
+            if getattr(self.game, "code_colour_{}".format(i)) == getattr(self, "guess_colour_{}".format(i)):
+                used.append(i)
+        for j in range(1, 5):
+            for i in range(1, 5):
                 if i == j:
                     continue
-                if getattr(self, "guess_colour_{}".format(i)) == getattr(self.game, "code_colour_{}".format(j)):
+                if getattr(self, "guess_colour_{}".format(i)) == getattr(self.game, "code_colour_{}".format(j))\
+                        and j not in used:
+                    used.append(j)
                     total += 1
                     break
         return total
