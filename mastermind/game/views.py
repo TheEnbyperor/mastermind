@@ -42,6 +42,7 @@ def game_guesses_view(request, id):
     out = {
         "status": "success",
         "guesses-left": game.guesses_left,
+        "finished": game.game_finished,
         "guesses": [],
     }
     for guess in guesses:

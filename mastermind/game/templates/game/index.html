@@ -37,10 +37,10 @@
             <div class="row">
                 <div class="col-3" style="margin: 0 auto">
                     <div class="card text-center">
-                      <h4 class="card-header">Guesses left</h4>
-                      <div class="card-body">
-                        <h5 class="card-text" id="guesses-left">10</h5>
-                      </div>
+                        <h4 class="card-header">Guesses left</h4>
+                        <div class="card-body">
+                            <h5 class="card-text" id="guesses-left">10</h5>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,6 +90,15 @@
                 <button type="button" class="btn btn-primary btn-lg" id="guess-button" style="margin: 0 auto">Guess</button>
             </div>
         </div>
+        <div id="finish-screen" class="text-center" style="display: none">
+            <div class="row">
+                <div class="col-12">
+                    <h2>Game over</h2>
+                    <h3 id="finish-state"></h3>
+                    <button type="button" class="btn btn-success btn-lg" id="restart-button">Start again</button>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="mt-3" id="guesses">
 
@@ -126,6 +135,7 @@
         }
         return cookieValue;
     }
+
     const csrftoken = getCookie('csrftoken');
 
     const $guess_row = $(`<div class="row bg-secondary py-4 mb-3 rounded">
@@ -181,7 +191,7 @@
                 if (data.status === "success") {
                     // console.log(data);
                     $guesses.html("");
-                    for (let i=0;i<data.guesses.length;i++) {
+                    for (let i = 0; i < data.guesses.length; i++) {
                         let $row = $guess_row.clone();
                         for (let j = 0; j < 4; j++) {
                             $($row.find(".guess-pin").get(j)).css("background-color", colour_map[data.guesses[i]["pos" + (j + 1)]]);
@@ -195,7 +205,17 @@
                         }
                         $guesses.prepend($row);
                     }
-                    $("#guesses-left").text(data["guesses-left"])
+                    $("#guesses-left").text(data["guesses-left"]);
+                    if (data.finished) {
+                        $("#guessing-screen").hide();
+                        $("#finish-screen").show();
+                        clearInterval(status.timer);
+                        $("#restart-button").on("click", function () {
+                            $("#finish-screen").hide();
+                            $("#start-screen").show();
+                            $guesses.html("");
+                        });
+                    }
                 }
             },
             dataType: 'json'
@@ -213,7 +233,13 @@
             },
             success: function (data) {
                 getGuesses();
-                console.log(data);
+                if (data.last) {
+                    if (data.correct) {
+                        $("#finish-state").text("You win!")
+                    } else {
+                        $("#finish-state").text("You lose!")
+                    }
+                }
             },
             dataType: 'json'
         })
@@ -224,8 +250,9 @@
             // these HTTP methods do not require CSRF protection
             return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
+
         $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
+            beforeSend: function (xhr, settings) {
                 if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", csrftoken);
                 }
@@ -243,7 +270,7 @@
                             if (data.status === "success") {
                                 $("#error-box").html("");
                                 status.game_code = data.game_id;
-                                status.start_time = new Date(data.start_time*1000);
+                                status.start_time = new Date(data.start_time * 1000);
                                 $("#start-screen").hide();
                                 $("#guessing-screen").show();
                                 status.timer = setInterval(getGuesses, 1000);
