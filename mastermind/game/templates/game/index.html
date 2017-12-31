@@ -33,6 +33,63 @@
                 </div>
             </div>
         </div>
+        <div id="guessing-screen" style="display: none">
+            <div class="row">
+                <div class="col-3" style="margin: 0 auto">
+                    <div class="card text-center">
+                      <h4 class="card-header">Guesses left</h4>
+                      <div class="card-body">
+                        <h5 class="card-text" id="guesses-left">10</h5>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-3">
+                    <select class="form-control" id="guessing-select-1">
+                        <option value="R">Red</option>
+                        <option value="G">Green</option>
+                        <option value="BU">Blue</option>
+                        <option value="Y">Yellow</option>
+                        <option value="W">White</option>
+                        <option value="BA">Black</option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select class="form-control" id="guessing-select-2">
+                        <option value="R">Red</option>
+                        <option value="G">Green</option>
+                        <option value="BU">Blue</option>
+                        <option value="Y">Yellow</option>
+                        <option value="W">White</option>
+                        <option value="BA">Black</option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select class="form-control" id="guessing-select-3">
+                        <option value="R">Red</option>
+                        <option value="G">Green</option>
+                        <option value="BU">Blue</option>
+                        <option value="Y">Yellow</option>
+                        <option value="W">White</option>
+                        <option value="BA">Black</option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select class="form-control" id="guessing-select-4">
+                        <option value="R">Red</option>
+                        <option value="G">Green</option>
+                        <option value="BU">Blue</option>
+                        <option value="Y">Yellow</option>
+                        <option value="W">White</option>
+                        <option value="BA">Black</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <button type="button" class="btn btn-primary btn-lg" id="guess-button" style="margin: 0 auto">Guess</button>
+            </div>
+        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -67,6 +124,23 @@
     }
     const csrftoken = getCookie('csrftoken');
 
+    function sendGuess() {
+        $.post({
+            url: '/game/' + status.game_code + '/guess/',
+            data: {
+                "pos1": $("#guessing-select-1").val(),
+                "pos2": $("#guessing-select-2").val(),
+                "pos3": $("#guessing-select-3").val(),
+                "pos4": $("#guessing-select-4").val(),
+            },
+            success: function (data) {
+                getGuesses();
+                console.log(data);
+            },
+            dataType: 'json'
+        })
+    }
+
     $(function () {
         function csrfSafeMethod(method) {
             // these HTTP methods do not require CSRF protection
@@ -92,6 +166,12 @@
                                 $("#error-box").html("");
                                 status.game_code = data.game_id;
                                 status.start_time = new Date(data.start_time*1000);
+                                $("#start-screen").hide();
+                                $("#guessing-screen").show();
+                                $("#guess-button").on("click", sendGuess);
+                            } else {
+                                $("#error-box")
+                                    .html("<div class=\"alert alert-danger\" role=\"alert\">An unknown error occurred</div>")
                             }
                         },
                         error: function (data) {
