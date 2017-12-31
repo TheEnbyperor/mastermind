@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Master Mind</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
+          integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="text-center display-4">Master Mind</h1>
+        <hr class="my-4">
+        <div id="start-screen">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2>Game code</h2>
+                    <input type="text" class="form-control" id="game_code" minlength="6" maxlength="6"
+                           pattern="^[0-9a-f]{6}$" style="max-width:200px;margin: 0 auto;">
+                    <div id="error-box" class="mt-2">
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-6">
+                    <button type="button" id="start_game" class="btn btn-primary btn-lg">Start game</button>
+                </div>
+                <div class="col-6">
+                    <button type="button" id="join_game" class="btn btn-success btn-lg">Join game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+        integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
+        crossorigin="anonymous"></script>
+<script>
+    let status = {
+        game_code: null,
+        start_time: null,
+    };
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    $(function () {
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        const $game_code = $("#game_code");
+        $("#join_game").on("click", function () {
+            if ($game_code.get(0).validity.valid) {
+                const game_code = $game_code.val();
+                if (game_code !== "") {
+                } else {
+                    $("#error-box").html("<div class=\"alert alert-danger\" role=\"alert\">Please input a game code</div>")
+                }
+            } else {
+                $("#error-box").html("<div class=\"alert alert-danger\" role=\"alert\">Please input a valid game code</div>")
+            }
+        });
+    });
+</script>
+</body>
+</html>
