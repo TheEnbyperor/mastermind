@@ -6,10 +6,10 @@ from django.db import models
 COLOUR_CHOICES = (
     ('R', 'Red'),
     ('G', 'Green'),
-    ('B', 'Blue'),
+    ('BU', 'Blue'),
     ('Y', 'Yellow'),
     ('W', 'White'),
-    ('B', 'Black'),
+    ('BA', 'Black'),
 )
 
 
@@ -21,10 +21,10 @@ class Game(models.Model):
     game_id = models.CharField(max_length=6, primary_key=True, default=gen_game_id)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
-    code_colour_1 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    code_colour_2 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    code_colour_3 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    code_colour_4 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
+    code_colour_1 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    code_colour_2 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    code_colour_3 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    code_colour_4 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
 
     def __str__(self):
         return "{}: {}-{}-{}-{}".format(self.game_id, self.code_colour_1, self.code_colour_2,
@@ -33,10 +33,11 @@ class Game(models.Model):
 
 class GameRow(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    guess_colour_1 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    guess_colour_2 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    guess_colour_3 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
-    guess_colour_4 = models.CharField(max_length=1, choices=COLOUR_CHOICES)
+    time = models.DateTimeField(auto_now_add=True)
+    guess_colour_1 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    guess_colour_2 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    guess_colour_3 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
+    guess_colour_4 = models.CharField(max_length=2, choices=COLOUR_CHOICES)
 
     @property
     def num_black_pegs(self):
