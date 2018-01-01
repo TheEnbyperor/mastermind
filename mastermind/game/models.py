@@ -32,7 +32,11 @@ class Game(models.Model):
 
     @property
     def game_finished(self):
-        return self.guesses_left == 0 or GameRow.objects.filter(game=self).order_by('-time')[0].guess_correct
+        guesses = GameRow.objects.filter(game=self).order_by('-time')
+        if len(guesses) > 0:
+            if guesses[0].guess_correct:
+                return True
+        return self.guesses_left == 0
 
     def __str__(self):
         return "{}: {}-{}-{}-{}".format(self.game_id, self.code_colour_1, self.code_colour_2,

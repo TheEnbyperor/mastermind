@@ -27,6 +27,21 @@ def game_view(request, id):
     return HttpResponse(json.dumps(out))
 
 
+def game_create_view(request):
+    if request.method == "POST":
+        game = Game(code_colour_1=request.POST['pos1'], code_colour_2=request.POST['pos2'],
+                    code_colour_3=request.POST['pos3'], code_colour_4=request.POST['pos4'])
+        game.save()
+        out = {
+            "status": "success",
+            "game_id": game.game_id,
+            "start_time": game.start_time.timestamp()
+        }
+        return HttpResponse(json.dumps(out))
+    else:
+        raise HttpResponseNotAllowed(permitted_methods=['POST'])
+
+
 def game_guesses_view(request, id):
     game = Game.objects.filter(game_id=id)
     if len(game) != 1:
